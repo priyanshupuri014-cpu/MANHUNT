@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1020">
+<title>Manhunt GPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a1020;--bg2:#121a33;--card:rgba(24,33,64,.62);--tx:#eaf0ff;--mu:#8e9bc0;--hunt:#ff5a3c;--surv:#2ee6c5;--amb:#ffb020;--you:#5aa8ff;--bd:rgba(140,160,230,.18);color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#eef2ff;--bg2:#dfe6ff;--card:rgba(255,255,255,.72);--tx:#121a33;--mu:#55618a;--bd:rgba(60,80,160,.18);--surv:#0aa88e;--hunt:#e8431f;color-scheme:light}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--tx);font:16px/1.45 Inter,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;width:70vmax;height:70vmax;border-radius:50%;filter:blur(90px);opacity:.35;animation:drift 18s ease-in-out infinite alternate}
+body::before{background:var(--hunt);top:-35vmax;left:-25vmax;opacity:.22}
+body::after{background:var(--surv);bottom:-40vmax;right:-30vmax;opacity:.2;animation-delay:-9s}
+body.danger{animation:dng 1s ease-in-out infinite}
+body.danger::before{opacity:.55}
+@keyframes drift{to{transform:translate(12vmax,8vmax) scale(1.15)}}
+@keyframes dng{50%{box-shadow:inset 0 0 90px rgba(255,90,60,.45)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--pc,rgba(46,230,197,.6))}100%{box-shadow:0 0 0 14px transparent}}
+@keyframes shine{to{background-position:200% center}}
+main{max-width:480px;margin:0 auto;padding:18px 16px 40px}
+h1{margin:6px 0 18px;font:700 32px/1 'Space Grotesk',system-ui,sans-serif;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+h1 span.t{background:linear-gradient(90deg,var(--tx),var(--hunt),var(--amb),var(--tx));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+.logo{width:34px;height:34px;border-radius:50%;border:2px solid var(--surv);position:relative;flex:none;overflow:hidden}
+.logo::after{content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 70%,var(--surv));animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#home,#game,#lobby,#play,#end,#hunterUI{animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.card>b,.card b.h{font:700 17px 'Space Grotesk',system-ui,sans-serif}
+input,select,button{font:inherit;width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--bd);background:rgba(0,0,0,.18);color:var(--tx);margin:6px 0;transition:border-color .2s,box-shadow .2s,transform .12s}
+input:focus,select:focus{outline:none;border-color:var(--surv);box-shadow:0 0 0 3px rgba(46,230,197,.22)}
+button{background:linear-gradient(135deg,var(--hunt),#ff8a3c);color:#fff;border:0;font-weight:600;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 6px 18px rgba(255,90,60,.35)}
+button:hover{transform:translateY(-1px)}button:active{transform:scale(.97)}
+button.s{background:rgba(140,160,230,.16);color:var(--tx);box-shadow:none;border:1px solid var(--bd)}
+button.g{background:linear-gradient(135deg,var(--surv),#2ea8e6);color:#06231d;box-shadow:0 6px 18px rgba(46,230,197,.3)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+button:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+.rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rpl .6s ease-out forwards;pointer-events:none}
+@keyframes rpl{to{transform:scale(4);opacity:0}}
+.mu{color:var(--mu);font-size:14px}.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font:700 30px/1.1 'Space Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.warn{color:var(--hunt);font-weight:600}.ok{color:var(--surv);font-weight:600}
+.pill{display:inline-block;padding:6px 14px;border-radius:99px;font-weight:700;margin-top:8px;animation:pop .5s}
+.pill.h{background:rgba(255,90,60,.16);color:var(--hunt);border:1px solid var(--hunt);--pc:rgba(255,90,60,.6);animation:pop .5s,pulse 1.6s 1s infinite}
+.pill.s{background:rgba(46,230,197,.14);color:var(--surv);border:1px solid var(--surv);animation:pop .5s,pulse 1.6s 1s infinite}
+.pl{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);animation:rise .4s}
+.pl:last-child{border:0}
+.av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--you),var(--surv));color:#06231d;font-weight:700;margin-right:10px;font-size:14px}
+canvas#cv{width:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(46,230,197,.08),rgba(0,0,0,.28));border:1px solid var(--bd);display:block;margin:14px 0;box-shadow:0 0 40px rgba(46,230,197,.12)}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#code{letter-spacing:.18em;cursor:pointer}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:99px;font-weight:600;opacity:0;transition:.3s;z-index:60;max-width:90vw;text-align:center;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#end .big{text-align:center;animation:pop .6s}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head><body><main>
+<h1><span class="logo"></span><span class="t">Manhunt GPS</span></h1>
+<div class="card"><div id="gps" class="mu">GPS is off.</div>
+ <button id="bGps" class="g">📍 Enable GPS access</button></div>
+<div id="cfg" class="card warn" hidden>Multiplayer is not connected yet. Open the file and set <code>DB_URL</code> at the top of the script.</div>
+
+<div id="home">
+ <div class="card"><b>Your name</b>
+  <input id="nm" maxlength="14" placeholder="Enter your name"></div>
+ <div class="card"><b>Create a game</b> <span class="mu">you'll be the host</span>
+  <div class="row"><select id="rad"><option value="150">Zone 150 m</option><option value="300" selected>Zone 300 m</option><option value="600">Zone 600 m</option><option value="1000">Zone 1 km</option></select>
+  <select id="nh"><option value="1">1 hunter</option><option value="2">2 hunters</option></select></div>
+  <button id="bNew">Create game here</button>
+  <div class="mu">The zone is centred on your current spot.</div></div>
+ <div class="card"><b>Join a game</b> <span class="mu">max 20 players</span>
+  <input id="cd" maxlength="5" placeholder="Game code" style="text-transform:uppercase;letter-spacing:.2em;text-align:center"><button id="bJoin" class="s">Join game</button></div>
+</div>
+
+<div id="game" hidden>
+ <div class="card"><div class="mu">Game code · tap to copy</div><div class="big" id="code"></div><div id="roleBox"></div></div>
+ <div id="lobby" class="card" hidden><b>Players <span id="cnt"></span>/20</b><div id="pls"></div>
+  <button id="bStart" class="g">Start game</button><div class="mu" id="lobMsg"></div></div>
+ <div id="play" hidden>
+  <div class="card"><div class="row"><div><div class="mu">Time</div><div class="big" id="tm"></div></div>
+   <div><div class="mu">Zone radius</div><div class="big" id="zr"></div></div></div><div id="info"></div></div>
+  <canvas id="cv" width="700" height="700"></canvas>
+  <div id="hunterUI" hidden><button id="bTag">🎯 Tag survivor in range</button><div class="mu" id="tagMsg"></div></div>
+ </div>
+ <div id="end" class="card" hidden><div class="big" id="endTxt"></div></div>
+ <button class="s" id="bLeave">Leave game</button>
+</div>
+</main>
+<canvas id="fx"></canvas><div id="toast"></div>
+<script>
+// ====== SET THIS ONCE: your Firebase Realtime Database URL (test mode), e.g. 'https://my-game-default-rtdb.firebaseio.com' ======
+const DB_URL='https://man-hunt-bba7e-default-rtdb.asia-southeast1.firebasedatabase.app';
+// =========================================================================================================================
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C=180,S=30,PING=270,PLEN=10,MAXT=1200,MAXP=20;
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let uid=ls('mh_uid')||(Math.random().toString(36).slice(2,10));ls('mh_uid',uid);
+let base=DB_URL.trim().replace(/\/+$/,''),code=null,G=null,P={},pos=null,wid=null,lastW=0,off=0,wAt=0,outSince=null,myStatus='alive',poll=null,wl=null;
+let V={r:0,h:false,ping:false},wasPing=false,pingAt=0,ended=false,prevStatus='alive';
+const now=()=>Date.now()+off;
+const dist=(a,b)=>Math.hypot((b.lng-a.lng)*111320*Math.cos(a.lat*Math.PI/180),(b.lat-a.lat)*110540);
+const xy=(c,p)=>[(p.lng-c.lng)*111320*Math.cos(c.lat*Math.PI/180),(p.lat-c.lat)*110540];
+const zoneR=t=>{const k=Math.floor(t/C),ph=t-k*C,f=n=>Math.max(G.r0*Math.pow(.7,n),25);let r=f(k);if(ph>C-S)r+=(f(k+1)-r)*(ph-(C-S))/S;return r};
+const isH=id=>G&&(G.hunters||[]).includes(id);
+const el=()=>G&&G.status==='running'?(now()-G.startAt)/1000:0;
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const pingOn=t=>t>=PING&&t%PING<PLEN;
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+
+// ripple on buttons
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b||b.disabled||RM)return;const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)/3,s=document.createElement('span');s.className='rp';s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';b.appendChild(s);setTimeout(()=>s.remove(),600)});
+
+// ---------- database ----------
+async function rq(m,path,body){
+ if(!base)throw new Error('Multiplayer is not set up: add DB_URL in the script.');
+ const r=await fetch(base+'/'+path+'.json',{method:m,body:body===undefined?undefined:JSON.stringify(body)});
+ if(!r.ok)throw new Error('Database error '+r.status+'. Check DB_URL and test-mode rules.');
+ return r.json();
+}
+function saveName(){ls('mh_nm',$('nm').value.trim())}
+
+// ---------- GPS ----------
+const UA=navigator.userAgent,IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const INAPP=/FBAN|FBAV|Instagram|Line\/|Snapchat|Messenger|MicroMessenger|; wv\)|WhatsApp|GSA\//i.test(UA);
+let gpsBusy=false,gpsRetry=null,lastFix=0,gpsDog=null;
+function gpsMsg(h,cls){$('gps').innerHTML='<span class="'+(cls||'warn')+'">'+h+'</span>'}
+function gpsOk(p){
+ lastFix=Date.now();gpsBusy=false;
+ pos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
+ $('gps').innerHTML='<span class="ok">\ud83d\udccd GPS live</span> \u00b7 accuracy \u00b1'+Math.round(pos.acc)+' m';$('bGps').hidden=true;push();
+}
+function gpsErr(e){
+ gpsBusy=false;
+ const m={1:'Location permission denied. '+(IOS?'iPhone: Settings \u2192 Privacy & Security \u2192 Location Services \u2192 turn ON, then Safari Websites \u2192 While Using the App. ':'Android: tap the \ud83d\udd12 icon in the address bar \u2192 Permissions \u2192 Location \u2192 Allow (also make sure phone Location is ON). ')+'Then tap Enable GPS again.'+(INAPP?' You seem to be inside an in-app browser \u2014 open this link in Chrome/Safari instead.':''),
+  2:'Position unavailable. Turn ON your phone\u2019s Location (GPS) in quick settings and try again.',
+  3:'Still searching for GPS\u2026 move to an open area or turn on Wi\u2011Fi/mobile data.'}[e.code]||e.message||'GPS error';
+ gpsMsg(m);
+ if(e.code!==3)$('bGps').hidden=false;
+ else{clearTimeout(gpsRetry);gpsRetry=setTimeout(()=>{if(!pos||Date.now()-lastFix>20000)watchGps(false)},1500)}
+}
+// watch with fallback: high accuracy first, then network/low accuracy
+function watchGps(high){
+ if(wid!==null){try{navigator.geolocation.clearWatch(wid)}catch(e){}wid=null}
+ wid=navigator.geolocation.watchPosition(gpsOk,e=>{
+  if(e.code===1){gpsErr(e);return}
+  if(high){watchGps(false);return}          // fall back to low accuracy
+  gpsErr(e);                                  // low accuracy also failed: show message, watchdog retries
+ },{enableHighAccuracy:high,maximumAge:high?1000:10000,timeout:high?20000:40000});
+}
+function startGps(){
+ if(!navigator.geolocation){gpsMsg('This browser has no GPS support.');return}
+ if(!window.isSecureContext){gpsMsg('GPS only works on HTTPS. Open this page from an <b>https://</b> link (not a downloaded file, http:// or file://). Host it on GitHub Pages / Netlify / Vercel.');$('bGps').hidden=false;return}
+ if(gpsBusy)return;gpsBusy=true;
+ gpsMsg('Asking for GPS permission\u2026 tap <b>Allow</b> on the popup.','mu');
+ // 1) request INSIDE the tap handler so mobile shows the permission prompt. Low accuracy first = fast fix.
+ navigator.geolocation.getCurrentPosition(p=>{gpsOk(p);watchGps(true)},e=>{
+  if(e.code===1){gpsErr(e);return}
+  // 2) couldn't get a quick fix: still start the watch (high accuracy, auto falls back)
+  gpsMsg('Searching for GPS signal\u2026','mu');gpsBusy=false;watchGps(true);
+ },{enableHighAccuracy:false,maximumAge:60000,timeout:10000});
+ try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wl=w).catch(()=>{})}catch(e){}
+ // watchdog: if updates stop for 30s, restart the watch
+ clearInterval(gpsDog);gpsDog=setInterval(()=>{if(wid!==null&&lastFix&&Date.now()-lastFix>30000){lastFix=Date.now();watchGps(false)}},10000);
+}
+// auto-start if permission was already granted earlier
+try{navigator.permissions&&navigator.permissions.query({name:'geolocation'}).then(r=>{if(r.state==='granted')startGps();r.onchange=()=>{if(r.state==='granted')startGps()}}).catch(()=>{})}catch(e){}
+if(INAPP)setTimeout(()=>{if(!pos)gpsMsg('Tip: if GPS does not start, open this page in Chrome or Safari, not inside another app.','mu')},500);
+// resume GPS when returning to the tab
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&navigator.geolocation&&pos&&wid!==null)watchGps(false)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&code&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wl=w).catch(()=>{})});
+
+async function push(force){
+ if(!pos||!code||!base)return;
+ const t=Date.now();if(!force&&t-lastW<3000)return;lastW=t;wAt=t;
+ try{await rq('PUT','games/'+code+'/players/'+uid,{name:$('nm').value.trim()||'Player',lat:pos.lat,lng:pos.lng,acc:Math.round(pos.acc),status:myStatus,ts:{'.sv':'timestamp'}})}catch(e){}
+}
+
+// ---------- game flow ----------
+async function create(){
+ if(!pos&&wid===null)startGps();
+ if(!pos)return toast('Tap Enable GPS and wait for a GPS fix first.');
+ saveName();
+ code=Math.random().toString(36).slice(2,7).toUpperCase();
+ try{await rq('PUT','games/'+code+'/meta',{host:uid,status:'lobby',r0:+$('rad').value,nh:+$('nh').value,center:{lat:pos.lat,lng:pos.lng},startAt:0})}
+ catch(e){code=null;return toast(e.message)}
+ enter();await push(true);
+}
+async function join(){
+ if(!pos&&wid===null)startGps();
+ saveName();
+ const c=$('cd').value.trim().toUpperCase();if(!c)return toast('Enter the game code.');
+ try{
+  const g=await rq('GET','games/'+c);
+  if(!g||!g.meta)return toast('Game not found.');
+  if(g.meta.status!=='lobby')return toast('That game already started.');
+  const n=Object.keys(g.players||{});
+  if(n.length>=MAXP&&!n.includes(uid))return toast('Game is full (20 players).');
+  code=c;
+ }catch(e){return toast(e.message)}
+ enter();await push(true);
+}
+function enter(){
+ $('home').hidden=true;$('game').hidden=false;$('code').textContent=code;ended=false;prevStatus='alive';
+ if(!pos)startGps();
+ refresh();poll=setInterval(refresh,2000);
+}
+async function refresh(){
+ if(!code)return;
+ try{
+  const g=await rq('GET','games/'+code);if(!g)return;
+  G=g.meta;P=g.players||{};
+  if(P[uid]&&P[uid].ts&&wAt)off=P[uid].ts-wAt;
+  if(P[uid]&&P[uid].status==='caught')myStatus='caught';
+  ui();
+ }catch(e){}
+}
+async function start(){
+ const ids=Object.keys(P);if(ids.length<2)return;
+ const nh=Math.min(G.nh,ids.length-1),h=[...ids].sort(()=>Math.random()-.5).slice(0,nh);
+ await rq('PATCH','games/'+code+'/meta',{status:'running',hunters:h,startAt:{'.sv':'timestamp'}});refresh();
+}
+async function tag(){
+ if(!pos)return;let best=null,bd=1e9;
+ for(const [id,p] of Object.entries(P)){
+  if(isH(id)||p.status!=='alive'||now()-p.ts>20000)continue;
+  const d=dist(pos,p),range=10+Math.min(pos.acc+(p.acc||0),30);
+  if(d<=range&&d<bd){best=id;bd=d}
+ }
+ if(best){await rq('PATCH','games/'+code+'/players/'+best,{status:'caught'});$('tagMsg').textContent='Tagged '+P[best].name+'!';buzz([60,40,120]);confetti(40,['#ff5a3c','#ffb020']);refresh()}
+ else{$('tagMsg').textContent='No survivor in range (10 m + GPS allowance).';buzz(200)}
+}
+async function leave(){
+ clearInterval(poll);try{await rq('DELETE','games/'+code+'/players/'+uid)}catch(e){}
+ code=null;G=null;P={};myStatus='alive';outSince=null;document.body.classList.remove('danger');
+ $('game').hidden=true;$('home').hidden=false;$('end').hidden=true;
+}
+function ui(){
+ if(!G)return;const run=G.status==='running',ids=Object.keys(P);
+ $('lobby').hidden=G.status!=='lobby';$('play').hidden=!run;
+ $('cnt').textContent=ids.length;
+ $('pls').innerHTML=ids.map(i=>'<div class="pl"><span><span class="av">'+esc((P[i].name||'?')[0].toUpperCase())+'</span>'+esc(P[i].name)+(i===G.host?' 👑':'')+'</span><span class="mu">'+(i===uid?'you':'')+'</span></div>').join('');
+ $('bStart').hidden=G.host!==uid;$('bStart').disabled=ids.length<2;
+ $('lobMsg').textContent=G.host===uid?(ids.length<2?'Need at least 2 players.':'Share the code, then start.'):'Waiting for host to start…';
+ if(run){const h=isH(uid),k=h?'🔴 You are a HUNTER':'🟢 You are a SURVIVOR';if($('roleBox').dataset.k!==k){$('roleBox').dataset.k=k;$('roleBox').innerHTML='<span class="pill '+(h?'h':'s')+'">'+k+'</span>';buzz(150)}$('hunterUI').hidden=!h}
+}
+
+// ---------- game loop ----------
+function tick(){
+ if(!G||G.status!=='running')return;
+ const t=el(),r=zoneR(t),h=isH(uid),ping=pingOn(t);
+ $('tm').textContent=fmt(t);$('zr').textContent=Math.round(r)+' m';
+ let msg='',danger=false;
+ if(pos&&!h&&myStatus==='alive'){
+  const eff=dist(G.center,pos)-Math.min(pos.acc,50);
+  if(eff>r+10){danger=true;outSince=outSince||Date.now();const left=30-(Date.now()-outSince)/1000;
+   msg+='<div class="warn">⚠️ Outside the zone! Get back in: '+Math.max(0,Math.ceil(left))+' s</div>';
+   if(left<=0){myStatus='out';push(true)}}
+  else outSince=null;
+ }
+ if(danger&&!document.body.classList.contains('danger'))buzz([200,100,200]);
+ document.body.classList.toggle('danger',danger);
+ if(!h&&myStatus!=='alive'){msg+='<div class="warn">You are '+(myStatus==='caught'?'caught':'out of the zone')+'. Spectating.</div>';if(prevStatus==='alive')buzz([300,100,300])}
+ prevStatus=myStatus;
+ msg+='<div class="mu">'+(t%C>C-S?'Zone shrinking now!':'Next shrink in '+fmt(C-S-(t%C)))+'</div>';
+ if(h)msg+=ping?'<div class="ok">👁 Survivors revealed: '+Math.ceil(PLEN-t%PING)+' s</div>':'<div class="mu">Next reveal in '+fmt(t<PING?PING-t:PING-t%PING)+'</div>';
+ else msg+='<div class="mu">Hunters see you for 10 s every 4½ min.</div>';
+ $('info').innerHTML=msg;
+ if(ping&&!wasPing){pingAt=performance.now();if(h)buzz([80,60,80])}wasPing=ping;
+ V={r,h,ping};
+ const alive=Object.entries(P).filter(([i,p])=>!isH(i)&&p.status==='alive').length;
+ if(alive===0||t>=MAXT){$('end').hidden=false;$('endTxt').textContent=alive===0?'🔴 Hunters win!':'🟢 Survivors win! ('+alive+' left)';
+  if(!ended){ended=true;document.body.classList.remove('danger');confetti(140,alive===0?['#ff5a3c','#ffb020','#fff']:['#2ee6c5','#5aa8ff','#fff'])}}
+}
+
+// ---------- radar drawing (60 fps) ----------
+function draw(ts){
+ requestAnimationFrame(draw);
+ if(!G||G.status!=='running'||$('play').hidden)return;
+ const {r,h,ping}=V,cv=$('cv'),x=cv.getContext('2d'),W=cv.width,sc=W/2/(G.r0*1.15),cx=W/2,cy=W/2;
+ const cs=getComputedStyle(document.documentElement),tx=cs.getPropertyValue('--tx'),mu=cs.getPropertyValue('--mu');
+ const pu=RM?0:(Math.sin(ts/350)+1)/2;
+ x.clearRect(0,0,W,W);
+ // range rings
+ x.lineWidth=1;x.strokeStyle=mu;x.globalAlpha=.25;
+ for(let i=1;i<=3;i++){x.beginPath();x.arc(cx,cy,G.r0*sc*i/3,0,7);x.stroke()}
+ x.beginPath();x.moveTo(cx,0);x.lineTo(cx,W);x.moveTo(0,cy);x.lineTo(W,cy);x.stroke();x.globalAlpha=1;
+ // sweep beam
+ if(!RM){const a=ts/1400%(Math.PI*2);const g=x.createConicGradient?x.createConicGradient(a-1.2,cx,cy):null;
+  if(g){g.addColorStop(0,'rgba(46,230,197,0)');g.addColorStop(.19,'rgba(46,230,197,.28)');g.addColorStop(.2,'rgba(46,230,197,0)');g.addColorStop(1,'rgba(46,230,197,0)');x.fillStyle=g;x.beginPath();x.arc(cx,cy,G.r0*sc,0,7);x.fill()}}
+ // outside-of-zone tint
+ x.fillStyle='rgba(255,90,60,'+(.12+pu*.05)+')';x.beginPath();x.arc(cx,cy,W,0,7);x.arc(cx,cy,r*sc,0,7,true);x.fill('evenodd');
+ // start boundary + live zone
+ x.strokeStyle=mu;x.setLineDash([6,8]);x.lineWidth=2;x.beginPath();x.arc(cx,cy,G.r0*sc,0,7);x.stroke();x.setLineDash([]);
+ x.strokeStyle='#ff5a3c';x.lineWidth=3+pu*3;x.shadowColor='#ff5a3c';x.shadowBlur=14+pu*12;x.beginPath();x.arc(cx,cy,r*sc,0,7);x.stroke();x.shadowBlur=0;
+ // reveal shockwave
+ const age=(performance.now()-pingAt)/1000;
+ if(h&&ping&&age<2&&!RM){x.strokeStyle='rgba(46,230,197,'+(1-age/2)+')';x.lineWidth=4;x.beginPath();x.arc(cx,cy,age/2*W*.7,0,7);x.stroke()}
+ const dot=(p,col,lab,big)=>{const[a,b]=xy(G.center,p),px=cx+a*sc,py=cy-b*sc;
+  x.fillStyle=col;x.globalAlpha=.25;x.beginPath();x.arc(px,py,14+pu*10,0,7);x.fill();x.globalAlpha=1;
+  x.shadowColor=col;x.shadowBlur=14;x.beginPath();x.arc(px,py,big?11:9,0,7);x.fill();x.shadowBlur=0;
+  if(lab){x.fillStyle=tx;x.font='600 24px Inter,system-ui,sans-serif';x.fillText(lab,px+16,py+8)}};
+ for(const [id,p] of Object.entries(P)){
+  if(id===uid)continue;
+  if(h&&ping&&!isH(id)&&p.status==='alive')dot(p,'#2ee6c5',p.name);
+  if(h&&isH(id))dot(p,'#ff5a3c',p.name);
+ }
+ if(pos)dot(pos,h?'#ffb020':'#5aa8ff','YOU',true);
+}
+
+// ---------- confetti ----------
+let parts=[],fxOn=false;
+function confetti(n,cols){if(RM)return;const f=$('fx');f.width=innerWidth;f.height=innerHeight;
+ for(let i=0;i<n;i++)parts.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*14,vy:-Math.random()*13-3,s:5+Math.random()*6,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*.4,l:1});
+ if(!fxOn){fxOn=true;requestAnimationFrame(fx)}}
+function fx(){const f=$('fx'),c=f.getContext('2d');c.clearRect(0,0,f.width,f.height);
+ parts=parts.filter(p=>p.l>0&&p.y<f.height+20);
+ for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.99;p.r+=p.vr;p.l-=.006;c.save();c.globalAlpha=Math.max(p.l,0);c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;c.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);c.restore()}
+ if(parts.length)requestAnimationFrame(fx);else{fxOn=false;c.clearRect(0,0,f.width,f.height)}}
+
+$('nm').value=ls('mh_nm')||'';
+if(!base)$('cfg').hidden=false;
+$('bGps').onclick=startGps;$('bNew').onclick=create;$('bJoin').onclick=join;
+$('bStart').onclick=start;$('bTag').onclick=tag;$('bLeave').onclick=leave;
+$('code').onclick=()=>{try{navigator.clipboard.writeText(code);toast('Game code copied')}catch(e){}};
+setInterval(tick,500);requestAnimationFrame(draw);
+</script></body></html>
